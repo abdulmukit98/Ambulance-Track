@@ -68,6 +68,42 @@ public class CustomerLoginRegisterActivity extends AppCompatActivity {
             }
         });
 
+        CustomerLoginButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String email = EmailCustomer.getText().toString();
+                String password = PasswordCustomer.getText().toString();
+                SignInCustomer(email, password);
+            }
+        });
+
+    }
+
+    private void SignInCustomer(String email, String password) {
+        if (TextUtils.isEmpty(email)) {
+            Toast.makeText(CustomerLoginRegisterActivity.this, "Please write Email...", Toast.LENGTH_SHORT).show();
+        }
+        if (TextUtils.isEmpty(password)) {
+            Toast.makeText(CustomerLoginRegisterActivity.this, "Please Write password...", Toast.LENGTH_SHORT).show();
+        } else {
+            loadingBar.setTitle("Customer Login");
+            loadingBar.setMessage("Please wait while we are checking your credentials");
+            loadingBar.show();
+            mAuth.signInWithEmailAndPassword(email, password)
+                    .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                        @Override
+                        public void onComplete(@NonNull Task<AuthResult> task) {
+                            if (task.isSuccessful()) {
+                                Toast.makeText(CustomerLoginRegisterActivity.this, "Customer Logged in Successfully", Toast.LENGTH_SHORT).show();
+                                loadingBar.dismiss();
+                            } else {
+                                Toast.makeText(CustomerLoginRegisterActivity.this, "Login Unsuccessful. Try again", Toast.LENGTH_SHORT).show();
+                                loadingBar.dismiss();
+                            }
+                        }
+                    });
+        }
+
     }
 
     private void RegisterCustomer(String email, String password) {
@@ -96,4 +132,6 @@ public class CustomerLoginRegisterActivity extends AppCompatActivity {
                     });
         }
     }
+
+
 }

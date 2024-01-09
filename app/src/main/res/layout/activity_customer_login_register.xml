@@ -42,7 +42,7 @@
         android:textSize="24dp"
         android:layout_marginTop="10dp"
         android:hint="Password..."
-        android:inputType="textPassword" />
+        android:inputType="number" />
 
     <Button
         android:id="@+id/customer_login_btn"
