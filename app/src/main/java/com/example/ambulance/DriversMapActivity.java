@@ -6,9 +6,12 @@ import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentActivity;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
 
 import com.firebase.geofire.GeoFire;
@@ -27,10 +30,11 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.example.ambulance.databinding.ActivityDriversMapBinding;
+//import com.example.ambulance.databinding.ActivityDriversMapBinding;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -41,10 +45,21 @@ public class DriversMapActivity extends FragmentActivity implements OnMapReadyCa
     private LocationRequest locationRequest;
     private Marker currentLocationMarker;
 
+    private Button LogoutDriverButton;
+    private Button SettingsDriverButton;
+    private Boolean currentLogoutDriverStatus = false;
+
+    FirebaseAuth mAuth;
+    FirebaseUser currentUser;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_drivers_map);
+
+        mAuth = FirebaseAuth.getInstance();
+        currentUser = mAuth.getCurrentUser();
+        LogoutDriverButton = findViewById(R.id.driver_logout_btn);
+        SettingsDriverButton = findViewById(R.id.driver_settings_btn);
 
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -69,6 +84,23 @@ public class DriversMapActivity extends FragmentActivity implements OnMapReadyCa
                 }
             }
         };
+
+        LogoutDriverButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                currentLogoutDriverStatus = true;
+                DisconnectTheDriver();
+                mAuth.signOut();
+                LogoutDriver();
+            }
+        });
+    }
+
+    private void LogoutDriver() {
+        Intent welcomeIntent = new Intent(getApplicationContext(), WelcomeActivity.class);
+        welcomeIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(welcomeIntent);
+        finish();
     }
 
     /**
@@ -122,10 +154,15 @@ public class DriversMapActivity extends FragmentActivity implements OnMapReadyCa
         mMap.animateCamera(CameraUpdateFactory.zoomTo(17));
 
         ///////////////////////
-        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        DatabaseReference DriverAvailablityRef = FirebaseDatabase.getInstance().getReference().child("Drivers Available");
-        GeoFire geoFire = new GeoFire(DriverAvailablityRef);
-        geoFire.setLocation(userId, new GeoLocation(latLng.latitude, latLng.longitude));
+        currentUser = mAuth.getCurrentUser();
+        if (currentUser != null)
+        {
+            String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+            DatabaseReference DriverAvailablityRef = FirebaseDatabase.getInstance().getReference().child("Drivers Available");
+            GeoFire geoFire = new GeoFire(DriverAvailablityRef);
+            geoFire.setLocation(userId, new GeoLocation(latLng.latitude, latLng.longitude));
+        }
+
     }
 
     @Override
@@ -145,6 +182,14 @@ public class DriversMapActivity extends FragmentActivity implements OnMapReadyCa
     protected void onStop() {
         super.onStop();
 
+        if (!currentLogoutDriverStatus)
+        {
+            DisconnectTheDriver();
+        }
+
+    }
+
+    private void DisconnectTheDriver() {
         String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         DatabaseReference DriverAvailablityRef = FirebaseDatabase.getInstance().getReference().child("Drivers Available");
         GeoFire geoFire = new GeoFire(DriverAvailablityRef);
