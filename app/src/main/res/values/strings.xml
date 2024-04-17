@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">Ambulance</string>
     <string name="title_activity_drivers_map">DriversMapActivity</string>
+    <string name="title_activity_customers_maps">CustomersMapsActivity</string>
 </resources>

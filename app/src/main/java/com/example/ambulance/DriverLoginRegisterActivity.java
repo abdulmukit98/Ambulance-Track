@@ -17,6 +17,8 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 public class DriverLoginRegisterActivity extends AppCompatActivity {
 
@@ -27,6 +29,9 @@ public class DriverLoginRegisterActivity extends AppCompatActivity {
     private EditText EmailDriver;
     private EditText PasswordDriver;
     private ProgressDialog loadingBar;
+    private DatabaseReference DriverDatabaseRef;
+    private String onlineDriverID;
+
     private FirebaseAuth mAuth;
 
 
@@ -123,6 +128,11 @@ public class DriverLoginRegisterActivity extends AppCompatActivity {
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             if (task.isSuccessful()) {
+                                onlineDriverID = mAuth.getCurrentUser().getUid();
+                                DriverDatabaseRef = FirebaseDatabase.getInstance().getReference()
+                                        .child("Users").child("Drivers").child(onlineDriverID);
+
+                                DriverDatabaseRef.setValue(true);
                                 Toast.makeText(DriverLoginRegisterActivity.this, "Driver Register Successful", Toast.LENGTH_SHORT).show();
                                 loadingBar.dismiss();
                                 startActivity(new Intent(DriverLoginRegisterActivity.this, DriversMapActivity.class));

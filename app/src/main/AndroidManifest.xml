@@ -33,6 +33,10 @@
             android:value="${MAPS_API_KEY}" />
 
         <activity
+            android:name=".CustomersMapsActivity"
+            android:exported="false"
+            android:label="@string/title_activity_customers_maps" />
+        <activity
             android:name=".DriversMapActivity"
             android:exported="false"
             android:label="@string/title_activity_drivers_map" />
